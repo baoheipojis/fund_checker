@@ -15,19 +15,16 @@ async fn main() -> Result<()> {
     // 初始化 API 客户端
     let client = api::JisiluClient::new()?;
 
-    // 获取所有 QDII 基金数据
-    println!("正在获取 QDII 基金数据...");
-    let qdii_funds = client.fetch_all_qdii().await?;
+    // 并行获取所有类型基金数据
+    println!("正在获取各类基金数据...\n");
+    let (qdii_funds, commodity_funds, lof_funds) = tokio::try_join!(
+        client.fetch_all_qdii(),
+        client.fetch_all_commodity(),
+        client.fetch_all_lof()
+    )?;
+
     println!("共获取 {} 只 QDII 基金", qdii_funds.len());
-
-    // 获取所有商品基金数据
-    println!("正在获取商品基金数据...");
-    let commodity_funds = client.fetch_all_commodity().await?;
     println!("共获取 {} 只商品基金", commodity_funds.len());
-
-    // 获取所有 LOF 基金数据
-    println!("正在获取 LOF 基金数据...");
-    let lof_funds = client.fetch_all_lof().await?;
     println!("共获取 {} 只 LOF 基金\n", lof_funds.len());
 
     // 合并所有基金数据
